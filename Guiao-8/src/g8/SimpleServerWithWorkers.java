@@ -1,0 +1,35 @@
+package g8;
+
+import java.net.ServerSocket;
+import java.net.Socket;
+
+// varias threads por conexao (controlo concorrencia)
+// camada no cliente e servidor que abstrai mensagens (FramedConnection), cliente e servidor nao querem saber o que a mensagem é , sao apenas bytes
+
+public class SimpleServerWithWorkers {
+    final static int WORKERS_PER_CONNECTION = 3; // 3 threads por conexao
+
+    public static void main(String[] args) throws Exception {
+        ServerSocket ss = new ServerSocket(12345);
+
+        while(true) {
+            Socket s = ss.accept();
+            FramedConnection c = new FramedConnection(s);
+
+            Runnable worker = () -> {
+                try (c) {
+                    for (;;) {
+                        byte[] b = c.receive();
+                        String msg = new String(b);
+                        System.out.println("Replying to: " + msg);
+                        c.send(msg.toUpperCase().getBytes());
+                    }
+                } catch (Exception ignored) { }
+            };
+
+            for (int i = 0; i < WORKERS_PER_CONNECTION; ++i)
+                new Thread(worker).start();
+        }
+    }
+}
+

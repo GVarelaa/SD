@@ -34,7 +34,7 @@ public class Barrier {
         this.counter++;
 
         if(this.counter < this.n ){
-            int myRound = this.round;
+            int myRound = this.round; // 0
             while(this.round == myRound){ // sincroniza-las, enquanto não tiveram todas entrado, esperam
                 this.waitingForThreads.await();
             }
